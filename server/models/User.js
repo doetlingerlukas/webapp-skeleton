@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcryptjs')
+const httpStatus = require('http-status-codes')
 
 const userShema = new mongoose.Schema({
   email: {
@@ -22,7 +24,7 @@ userShema.statics.userById = function(req, res) {
   })
 }
 
-userShema.static.users = function(req, res) {
+userShema.static('users', function(req, res) {
   user.find(function(err, users) {
     if (err) {
       console.log(err)
@@ -30,20 +32,20 @@ userShema.static.users = function(req, res) {
       res.json(users)
     }
   })
-}
+})
 
-userShema.statics.userCreate = function(req, res) {
+userShema.statics.userCreate = (req, res) => {
   const userData = {
     email: req.body.email,
     name: req.body.name,
     password: req.body.password
   }
-
+    
   user.create(userData, (err) => {
     if (err) {
-      res.status(400).send('adding user failed')
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Adding user failed!')
     } else {
-      res.status(200).json({'user': 'user added successfully'})
+      res.status(httpStatus.OK).send('User has been added!')
     }
   })
 }
@@ -51,7 +53,7 @@ userShema.statics.userCreate = function(req, res) {
 userShema.statics.userUpdate = function(req, res) {
   user.findById(req.params.id, function(err, user) {
     if (!user) {
-      res.status(404).send('data not found')
+      res.status(httpStatus.NOT_FOUND).send('User not found!')
     } else {
       user.email = req.body.email
       user.name = req.body.name
@@ -59,13 +61,25 @@ userShema.statics.userUpdate = function(req, res) {
     }
 
     user.save().then(() => {
-        res.json('user updated')
+        res.status(httpStatus.OK).end()
       })
       .catch(() => {
-        res.status(400).send('updating user failed')
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Updating user failed!')
       })
   })
 }
+
+userShema.pre('save', function(next) {
+  const user = this
+
+  bcrypt.hash(user.password, 10, (err, hash) => {
+    if (err) {
+      next(err)
+    }
+    user.password = hash
+    next()
+  })
+})
 
 const user = mongoose.model('User', userShema)
 module.exports = user
