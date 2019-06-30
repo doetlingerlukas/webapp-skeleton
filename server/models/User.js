@@ -1,19 +1,45 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const httpStatus = require('http-status-codes')
+const validator = require('validator')
+
+const emailValidators = [
+  {
+    isAsync: true,
+    validator: (v, cb) => {
+      user.find({email: v}, (err, user) => cb(user.length === 0))
+    }, 
+    message: 'E-Mail already in use!'
+  },
+  {
+    validator: validator.isEmail,
+    message: 'Not a valid address!'
+  }
+]
 
 const userShema = new mongoose.Schema({
   email: {
     type: String,
-    required: true 
+    required: true,
+    trim: true,
+    validate: emailValidators
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
+    minlength: 6,
+    validate: {
+      validator: (v) => {
+        return (/[A-Z]+/.test(v) && /[a-z]+/.test(v) && /\d+/.test(v) && /\W+/.test(v))
+      }, 
+      message: 'Password needs to conatin at least one number, one uppercase, one lowercase and one alphanumeric character!',
+    }
   },
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   }
 })
 
