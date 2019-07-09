@@ -60,6 +60,32 @@ userShema.static('users', function(req, res) {
   })
 })
 
+userShema.statics.userLogin = (req, res) => {
+  user.login(req.body.email, req.body.password, (err, user) => {
+    if (err || !user) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Wrong password or email!')
+    } else {
+      res.status(httpStatus.OK).end()
+    }
+  })
+}
+
+userShema.statics.login = (email, password, callback) => {
+  user.findOne({email: email}, (err, user) => {
+    if (err || !user) {
+      return callback(err)
+    }
+
+    bcrypt.compare(password, user.password, (err, success) => {
+      if (result) {
+        return callback(null, user)
+      }
+
+      return callback()
+    })
+  })
+}
+ 
 userShema.statics.userCreate = (req, res) => {
   const userData = {
     email: req.body.email,
