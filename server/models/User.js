@@ -43,10 +43,18 @@ const userShema = new mongoose.Schema({
   }
 })
 
-userShema.statics.userById = function(req, res) {
-  let id = req.params.id
-  user.findById(id, function(err, user) {
-    res.json(user)
+userShema.statics.userInfo = (req, res) => {
+  user.findOne({ email: req.body.email}, (err, user) => {
+    if (err) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Error while getting user!')
+    } else if (!user) {
+      res.status(httpStatus.NOT_FOUND).send('User was not found!')
+    } else {
+      res.status(httpStatus.OK).send(JSON.stringify({
+        'email': user.email,
+        'name': user.name
+      }))
+    }
   })
 }
 
