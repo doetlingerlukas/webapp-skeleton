@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const httpStatus = require('http-status-codes')
 const validator = require('validator')
+const { genJWT, verifyJWT } = require('../jwt')
 
 const emailValidators = [
   {
@@ -73,7 +74,10 @@ userShema.statics.userLogin = (req, res) => {
     if (err || !user) {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Wrong password or email!')
     } else {
-      res.status(httpStatus.OK).end()
+      res.status(httpStatus.OK).send(genJWT({
+        'email': user.email,
+        'name': user.name
+      }))
     }
   })
 }
@@ -85,7 +89,7 @@ userShema.statics.login = (email, password, callback) => {
     }
 
     bcrypt.compare(password, user.password, (err, success) => {
-      if (result) {
+      if (success) {
         return callback(null, user)
       }
 
