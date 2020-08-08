@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: webapp-skeleton-server-img
+    container_name: webapp-skeleton-server
+    volumes:
+     - .:/usr/src/app
+     - /usr/src/app/node_modules
+    ports:
+     - "8080:8080"
+    depends_on:
+      - mongo
+    env_file: .env
+    environment:
+     - MONGO_HOSTNAME=$MONGO_HOSTNAME
+     - MONGO_PORT=$MONGO_PORT
+     - MONGO_DB=$MONGO_DB
+  mongo:
+    image: mongo
+    container_name: webapp-skeleton-mongodb
+    ports:
+     - "27017:27017"
