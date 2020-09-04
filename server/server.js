@@ -7,11 +7,11 @@ const routes = require('./routes');
 // Connect to database
 require('./db');
 
-let User = require('./models/User')
+let User = require('./models/User');
 
 app.use(bodyParser.json());
 
-app.use('/api/', routes)
+app.use('/api/', routes);
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);

@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: webapp-skeleton-server-img
-    container_name: webapp-skeleton-server
+    container_name: server
     volumes:
      - .:/usr/src/app
      - /usr/src/app/node_modules
@@ -21,6 +21,6 @@ services:
      - MONGO_DB=$MONGO_DB
   mongo:
     image: mongo
-    container_name: webapp-skeleton-mongodb
+    container_name: mongodb
     ports:
      - "27017:27017"
